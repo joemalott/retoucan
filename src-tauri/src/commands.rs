@@ -91,7 +91,8 @@ pub async fn sample_photos(style: Option<String>, count: usize) -> Res<Vec<Strin
     tauri::async_runtime::spawn_blocking(move || {
         let lr = engine::lightroom_state();
         if lr.connected && !lr.selected.is_empty() {
-            return Ok(lr.selected.into_iter().take(count).collect());
+            let step = (lr.selected.len() / count.max(1)).max(1);
+            return Ok(lr.selected.into_iter().step_by(step).take(count).collect());
         }
         let id = style.or(engine::load_config().style).ok_or("no style")?;
         let model = engine::load_style(&id).map_err(err)?;
@@ -160,19 +161,21 @@ pub async fn predict_one(path: String, style: Option<String>) -> Res<Prediction>
 
 #[tauri::command]
 pub async fn edit_selection() -> Res<JobStatus> {
-    tauri::async_runtime::spawn_blocking(move || {
-        let lr = engine::lightroom_state();
-        if !lr.connected {
-            return Err("Lightroom isn't connected. Open Lightroom Classic with the Retoucan plugin installed.".into());
-        }
-        if lr.selected.is_empty() {
-            return Err("Select some photos in Lightroom first.".into());
-        }
-        let paths: Vec<PathBuf> = lr.selected.iter().map(PathBuf::from).collect();
-        engine::edit(&paths, &EditOptions::default()).map(|(j, _)| j).map_err(err)
-    })
-    .await
-    .map_err(err)?
+    tauri::async_runtime::spawn_blocking(edit_selection_blocking).await.map_err(err)?
+}
+
+/// Edit whatever is selected in Lightroom. Shared by the Edit button and
+/// the global shortcut.
+pub fn edit_selection_blocking() -> Res<JobStatus> {
+    let lr = engine::lightroom_state();
+    if !lr.connected {
+        return Err("Lightroom isn't connected. Open Lightroom Classic with the Retoucan plugin installed.".into());
+    }
+    if lr.selected.is_empty() {
+        return Err("Select some photos in Lightroom first.".into());
+    }
+    let paths: Vec<PathBuf> = lr.selected.iter().map(PathBuf::from).collect();
+    engine::edit(&paths, &EditOptions::default()).map(|(j, _)| j).map_err(err)
 }
 
 #[tauri::command]
@@ -185,4 +188,106 @@ pub fn job_status(id: String) -> JobStatus {
 pub fn mcp_command() -> Res<String> {
     let exe = std::env::current_exe().map_err(err)?;
     Ok(exe.to_string_lossy().into())
+}
+
+#[derive(Serialize)]
+pub struct CatalogPhoto {
+    path: String,
+    name: String,
+    folder: String,
+    /// 1 = pick, 0 = unflagged, -1 = rejected.
+    pick: i8,
+    rating: u8,
+    label: Option<String>,
+    capture_time: Option<String>,
+    exists: bool,
+    retoucan: bool,
+}
+
+#[derive(Serialize)]
+pub struct CatalogPhotos {
+    catalog: String,
+    photos: Vec<CatalogPhoto>,
+}
+
+/// Photos in the catalog Lightroom has open (or last had open), with the
+/// cull: flags, stars, color labels.
+#[tauri::command]
+pub async fn catalog_photos(catalog: Option<String>) -> Res<CatalogPhotos> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let catalog = catalog
+            .or(engine::lightroom_state().catalog)
+            .ok_or("Open your catalog in Lightroom Classic first.")?;
+        let mut photos: Vec<CatalogPhoto> = catalog::photos(std::path::Path::new(&catalog))
+            .map_err(err)?
+            .into_iter()
+            .map(|p| CatalogPhoto {
+                name: p.path.file_name().map(|n| n.to_string_lossy().into()).unwrap_or_default(),
+                path: p.path.to_string_lossy().into(),
+                folder: p.folder,
+                pick: p.pick.signum() as i8,
+                rating: p.rating.unwrap_or(0.0).clamp(0.0, 5.0) as u8,
+                label: p.label,
+                capture_time: p.capture_time,
+                exists: p.exists,
+                retoucan: p.retoucan,
+            })
+            .collect();
+        photos.sort_by(|a, b| a.capture_time.cmp(&b.capture_time).then(a.name.cmp(&b.name)));
+        Ok(CatalogPhotos { catalog, photos })
+    })
+    .await
+    .map_err(err)?
+}
+
+/// A small JPEG for the photo grid, cached on disk by path and file time.
+#[tauri::command]
+pub async fn thumbnail(path: String) -> Res<String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        use std::hash::{Hash, Hasher};
+        let src = PathBuf::from(&path);
+        let modified = std::fs::metadata(&src).and_then(|m| m.modified()).map_err(err)?;
+        let mut h = std::collections::hash_map::DefaultHasher::new();
+        (&path, modified).hash(&mut h);
+        let dir = engine::app_dir().join("thumbs");
+        let cached = dir.join(format!("{:016x}.jpg", h.finish()));
+        let bytes = match std::fs::read(&cached) {
+            Ok(b) => b,
+            Err(_) => {
+                let l = raw::load(&src, 360).map_err(err)?;
+                let mut buf = Cursor::new(Vec::new());
+                image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buf, 80).encode_image(&l.image).map_err(err)?;
+                let b = buf.into_inner();
+                let _ = std::fs::create_dir_all(&dir).and_then(|_| std::fs::write(&cached, &b));
+                b
+            }
+        };
+        Ok(format!("data:image/jpeg;base64,{}", base64::engine::general_purpose::STANDARD.encode(bytes)))
+    })
+    .await
+    .map_err(err)?
+}
+
+/// Edit a chosen set of photos (from the Photos screen). With `collection`,
+/// Lightroom also gathers them in that collection (the test batch).
+#[tauri::command]
+pub async fn edit_photos(paths: Vec<String>, collection: Option<String>) -> Res<JobStatus> {
+    tauri::async_runtime::spawn_blocking(move || {
+        if paths.is_empty() {
+            return Err("No photos chosen.".into());
+        }
+        let paths: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
+        let opts = EditOptions { collection, ..Default::default() };
+        engine::edit(&paths, &opts).map(|(j, _)| j).map_err(err)
+    })
+    .await
+    .map_err(err)?
+}
+
+/// "undo" (back to before Retoucan) or "cleanup" (keep edits, drop the undo
+/// snapshots) for these photos.
+#[tauri::command]
+pub fn photo_action(action: String, paths: Vec<String>) -> Res<JobStatus> {
+    let paths: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
+    engine::queue_action(&action, &paths).map_err(err)
 }

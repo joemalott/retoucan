@@ -240,6 +240,10 @@ pub struct EditOptions {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub look: Option<Option<LookChoice>>,
     pub retouch: Option<Vec<String>>,
+    /// Put the edited photos in this Lightroom collection and show it
+    /// (used for the test batch).
+    #[serde(default)]
+    pub collection: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -298,47 +302,61 @@ pub fn predict(paths: &[PathBuf], r: &Resolved) -> Vec<PhotoEdit> {
         .collect()
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct JobStatus {
     pub id: String,
     pub state: String, // "waiting" | "done" | "missing"
     pub applied: Option<usize>,
     pub skipped: Option<usize>,
     pub message: Option<String>,
+    /// While Lightroom works on the job: "Applying edits" or "Detecting masks".
+    #[serde(default)]
+    pub stage: Option<String>,
+    #[serde(default)]
+    pub done: Option<usize>,
+    #[serde(default)]
+    pub total: Option<usize>,
 }
 
 /// Queue edits for Lightroom. The plugin's watcher applies them within a
 /// second or two while Lightroom is open; otherwise they wait.
-pub fn queue_job(edits: &[PhotoEdit], r: &Resolved) -> Result<JobStatus> {
-    let jobs = bridge_dir().join("jobs");
-    std::fs::create_dir_all(&jobs)?;
+pub fn queue_job(edits: &[PhotoEdit], r: &Resolved, collection: Option<&str>) -> Result<JobStatus> {
     let id = format!("{}", SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis());
     let mut lua = String::from("return {\n  version = 1,\n");
     lua += &format!("  id = {},\n", lua_str(&id));
     if let Some(look) = &r.look {
+        // Lightroom assigns presets its own UUIDs, so the plugin also needs
+        // the group and name to find them.
+        let group = presets::read(&look.path).map(|p| p.group).unwrap_or_default();
         lua += &format!(
-            "  look = {{ uuid = {}, name = {}, amount = {} }},\n",
+            "  look = {{ uuid = {}, name = {}, group = {}, amount = {} }},\n",
             lua_str(&look.uuid),
             lua_str(&look.name),
+            lua_str(&group),
             look.amount
         );
     }
     lua += "  retouch = {";
     for id in &r.retouch {
-        if presets::RETOUCH.iter().any(|x| x.id == id) {
-            lua += &format!(" {},", lua_str(&presets::retouch_uuid(id)));
+        if let Some(x) = presets::RETOUCH.iter().find(|x| x.id == id) {
+            lua += &format!(
+                " {{ uuid = {}, group = [[Retoucan]], name = {} }},",
+                lua_str(&presets::retouch_uuid(id)),
+                lua_str(&format!("Retoucan - {}", x.label))
+            );
         }
     }
     lua += " },\n  photos = {\n";
     for e in edits.iter().filter(|e| e.error.is_none()) {
         lua += &format!("    {{ path = {}, settings = {} }},\n", lua_str(&e.path.to_string_lossy()), lua_table(&e.settings));
     }
-    lua += "  },\n}\n";
-    // Write then rename, so the plugin never reads a half-written job.
-    let tmp = jobs.join(format!("{id}.tmp"));
-    std::fs::write(&tmp, lua)?;
-    std::fs::rename(&tmp, jobs.join(format!("{id}.lua")))?;
-    Ok(JobStatus { id, state: "waiting".into(), applied: None, skipped: None, message: None })
+    lua += "  },\n";
+    if let Some(c) = collection {
+        lua += &format!("  collection = {},\n", lua_str(c));
+    }
+    lua += "}\n";
+    write_job(&id, &lua)?;
+    Ok(JobStatus { id, state: "waiting".into(), ..Default::default() })
 }
 
 pub fn job_status(id: &str) -> JobStatus {
@@ -350,10 +368,24 @@ pub fn job_status(id: &str) -> JobStatus {
             applied: v.get("applied").and_then(Value::as_u64).map(|n| n as usize),
             skipped: v.get("skipped").and_then(Value::as_u64).map(|n| n as usize),
             message: v.get("message").and_then(Value::as_str).map(String::from),
+            ..Default::default()
         };
     }
-    let waiting = bridge_dir().join("jobs").join(format!("{id}.lua")).exists();
-    JobStatus { id: id.into(), state: if waiting { "waiting" } else { "missing" }.into(), applied: None, skipped: None, message: None }
+    // The plugin renames a job to .running while it works on it.
+    let jobs = bridge_dir().join("jobs");
+    let waiting = jobs.join(format!("{id}.lua")).exists() || jobs.join(format!("{id}.running")).exists();
+    let progress = std::fs::read(bridge_dir().join("progress").join(format!("{id}.json")))
+        .ok()
+        .and_then(|b| serde_json::from_slice::<Value>(&b).ok());
+    let num = |k: &str| progress.as_ref().and_then(|p| p.get(k)).and_then(Value::as_u64).map(|n| n as usize);
+    JobStatus {
+        id: id.into(),
+        state: if waiting { "waiting" } else { "missing" }.into(),
+        stage: progress.as_ref().and_then(|p| p.get("stage")).and_then(Value::as_str).map(String::from),
+        done: num("done"),
+        total: num("total"),
+        ..Default::default()
+    }
 }
 
 /// Edit photos end to end: predict, then queue for Lightroom.
@@ -363,7 +395,34 @@ pub fn edit(paths: &[PathBuf], opts: &EditOptions) -> Result<(JobStatus, Vec<Pho
     if edits.iter().all(|e| e.error.is_some()) {
         bail!("Couldn't read any of those photos: {}", edits.first().and_then(|e| e.error.clone()).unwrap_or_default());
     }
-    Ok((queue_job(&edits, &r)?, edits))
+    Ok((queue_job(&edits, &r, opts.collection.as_deref())?, edits))
+}
+
+/// Queue an action for these photos: "undo" (back to the Before Retoucan
+/// snapshot), "cleanup" (keep the edits, drop the snapshot) or "check"
+/// (re-run mask detection, drop masks that found nothing).
+pub fn queue_action(action: &str, paths: &[PathBuf]) -> Result<JobStatus> {
+    if !matches!(action, "undo" | "cleanup" | "check") {
+        bail!("unknown action {action}");
+    }
+    let id = format!("{}", SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis());
+    let mut lua = format!("return {{\n  version = 1,\n  id = {},\n  action = {},\n  photos = {{\n", lua_str(&id), lua_str(action));
+    for p in paths {
+        lua += &format!("    {},\n", lua_str(&p.to_string_lossy()));
+    }
+    lua += "  },\n}\n";
+    write_job(&id, &lua)?;
+    Ok(JobStatus { id, state: "waiting".into(), ..Default::default() })
+}
+
+fn write_job(id: &str, lua: &str) -> Result<()> {
+    let jobs = bridge_dir().join("jobs");
+    std::fs::create_dir_all(&jobs)?;
+    // Write then rename, so the plugin never reads a half-written job.
+    let tmp = jobs.join(format!("{id}.tmp"));
+    std::fs::write(&tmp, lua)?;
+    std::fs::rename(&tmp, jobs.join(format!("{id}.lua")))?;
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
@@ -401,6 +460,87 @@ pub fn lightroom_state() -> LightroomState {
     }
 }
 
+/// Where Lightroom writes the plugin's LrLogger file.
+pub fn plugin_log_path() -> Option<PathBuf> {
+    if cfg!(target_os = "windows") {
+        dirs::data_local_dir().map(|d| d.join("Adobe/Lightroom/Logs/LrClassicLogs/Retoucan.log"))
+    } else {
+        dirs::home_dir().map(|d| d.join("Library/Logs/Adobe/Lightroom/LrClassicLogs/Retoucan.log"))
+    }
+}
+
+fn lightroom_running() -> bool {
+    let out = if cfg!(target_os = "windows") {
+        std::process::Command::new("tasklist").args(["/FI", "IMAGENAME eq Lightroom.exe", "/NH"]).output()
+    } else {
+        std::process::Command::new("pgrep").args(["-f", "MacOS/Adobe Lightroom Classic$"]).output()
+    };
+    out.map(|o| String::from_utf8_lossy(&o.stdout).to_lowercase().contains(if cfg!(target_os = "windows") { "lightroom.exe" } else { "" }) && !o.stdout.is_empty())
+        .unwrap_or(false)
+}
+
+/// Everything needed to tell why an edit didn't reach Lightroom, for
+/// `retoucan doctor` and bug reports.
+pub fn doctor() -> Value {
+    let lr = lightroom_state();
+    let plugin_dir = lightroom_modules_dir().map(|d| d.join("Retoucan.lrplugin"));
+    let outdated: Vec<&str> = match &plugin_dir {
+        Some(dir) => PLUGIN_FILES
+            .iter()
+            .filter(|(name, body)| std::fs::read_to_string(dir.join(name)).ok().as_deref() != Some(*body))
+            .map(|(name, _)| *name)
+            .collect(),
+        None => vec![],
+    };
+    let plugin_app = plugin_dir
+        .as_ref()
+        .and_then(|d| std::fs::read_to_string(d.join("Config.lua")).ok())
+        .and_then(|t| t.split("app = [[").nth(1).and_then(|r| r.split("]]").next()).map(String::from));
+    let list = |dir: &str, ext: &str| -> Vec<PathBuf> {
+        let mut v: Vec<PathBuf> = std::fs::read_dir(bridge_dir().join(dir))
+            .map(|r| r.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.extension().is_some_and(|e| e == ext)).collect())
+            .unwrap_or_default();
+        v.sort();
+        v
+    };
+    let waiting: Vec<String> = list("jobs", "lua").iter().filter_map(|p| p.file_stem()?.to_str().map(String::from)).collect();
+    let running: Vec<String> = list("jobs", "running").iter().filter_map(|p| p.file_stem()?.to_str().map(String::from)).collect();
+    let recent: Vec<Value> = list("done", "json")
+        .iter()
+        .rev()
+        .take(5)
+        .map(|p| {
+            let id = p.file_stem().and_then(|s| s.to_str()).unwrap_or("").to_string();
+            let mut v = std::fs::read(p).ok().and_then(|b| serde_json::from_slice::<Value>(&b).ok()).unwrap_or(Value::Null);
+            if let Value::Object(o) = &mut v {
+                o.insert("id".into(), Value::String(id));
+            }
+            v
+        })
+        .collect();
+    let log_tail: Vec<String> = plugin_log_path()
+        .and_then(|p| std::fs::read_to_string(p).ok())
+        .map(|t| t.lines().rev().take(15).map(String::from).collect::<Vec<_>>().into_iter().rev().collect())
+        .unwrap_or_default();
+    serde_json::json!({
+        "lightroom_running": lightroom_running(),
+        "connected": lr.connected,
+        "heartbeat_seconds_ago": lr.seconds_ago,
+        "catalog": lr.catalog,
+        "selected": lr.selected.len(),
+        "plugin_installed": lr.plugin_installed,
+        "plugin_outdated_files": outdated,
+        "plugin_calls_app": plugin_app,
+        "this_app": std::env::current_exe().ok(),
+        "jobs_waiting": waiting,
+        "jobs_running": running,
+        "recent_jobs": recent,
+        "config": load_config(),
+        "plugin_log": plugin_log_path(),
+        "plugin_log_tail": log_tail,
+    })
+}
+
 const PLUGIN_FILES: &[(&str, &str)] = &[
     ("Info.lua", include_str!("../../lightroom/Retoucan.lrplugin/Info.lua")),
     ("Bridge.lua", include_str!("../../lightroom/Retoucan.lrplugin/Bridge.lua")),
@@ -418,6 +558,8 @@ const STARTER_LOOKS: &[(&str, &str)] = &[
     ("moody-matte.xmp", include_str!("../../looks/moody-matte.xmp")),
     ("teal-and-amber.xmp", include_str!("../../looks/teal-and-amber.xmp")),
     ("faded-vintage.xmp", include_str!("../../looks/faded-vintage.xmp")),
+    ("sage-film.xmp", include_str!("../../looks/sage-film.xmp")),
+    ("golden-hour-film.xmp", include_str!("../../looks/golden-hour-film.xmp")),
     ("classic-bandw.xmp", include_str!("../../looks/classic-bandw.xmp")),
 ];
 

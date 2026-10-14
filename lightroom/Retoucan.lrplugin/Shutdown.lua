@@ -1,1 +1,2 @@
-require('Bridge').stop = true
+-- Nothing to do: the watcher loop stops when a newer one takes over
+-- (see Bridge.watch), and Lightroom ends it on quit.

@@ -119,7 +119,7 @@ fn edit_options(a: &Value) -> Result<EditOptions> {
         .get("retouch")
         .and_then(Value::as_array)
         .map(|v| v.iter().filter_map(|s| s.as_str().map(String::from)).collect());
-    Ok(EditOptions { style: opt_str(a, "style").map(String::from), look, retouch })
+    Ok(EditOptions { style: opt_str(a, "style").map(String::from), look, retouch, collection: None })
 }
 
 fn target_paths(a: &Value) -> Result<Vec<PathBuf>> {

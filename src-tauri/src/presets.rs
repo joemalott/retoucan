@@ -181,7 +181,8 @@ pub struct Retouch {
     /// (MaskSubType, MaskSubCategoryID, MaskName). Subtype 1 = subject,
     /// 2 = sky, 3 = a person part, 0 + category 22 = background.
     pub masks: &'static [(u8, Option<u8>, &'static str)],
-    /// Default local adjustments, in Lightroom's stored units (-1..1).
+    /// Retoucan's own default local adjustments, in Lightroom's stored units
+    /// (-1..1; x100 for the slider value). Deliberately subtle.
     pub defaults: &'static [(&'static str, f64)],
     /// Substrings of Imagen/Lightroom correction names to learn values from.
     pub learn_from: &'static [&'static str],
@@ -192,54 +193,42 @@ pub const RETOUCH: &[Retouch] = &[
         id: "subject",
         label: "Brighten subject",
         masks: &[(1, None, "Subject")],
-        defaults: &[("LocalExposure2012", 0.026), ("LocalShadows2012", 0.035), ("LocalWhites2012", 0.17)],
+        defaults: &[("LocalExposure2012", 0.08), ("LocalShadows2012", 0.1), ("LocalWhites2012", 0.05)],
         learn_from: &["Subjects Mask", "Subject"],
     },
     Retouch {
         id: "background",
         label: "Darken background",
         masks: &[(0, Some(22), "Background")],
-        defaults: &[("LocalExposure2012", -0.026), ("LocalHighlights2012", -0.035), ("LocalBlacks2012", -0.17)],
+        defaults: &[("LocalExposure2012", -0.12), ("LocalHighlights2012", -0.1), ("LocalSaturation", -0.05)],
         learn_from: &["Background"],
     },
     Retouch {
         id: "skin",
         label: "Smooth skin",
         masks: &[(3, Some(2), "Face Skin")],
-        defaults: &[("LocalTexture", -0.35), ("LocalClarity2012", -0.15)],
+        defaults: &[("LocalTexture", -0.2), ("LocalClarity2012", -0.1)],
         learn_from: &["Smooth Skin", "Skin"],
     },
     Retouch {
         id: "teeth",
         label: "Whiten teeth",
         masks: &[(3, Some(12), "Teeth")],
-        defaults: &[
-            ("LocalExposure2012", 0.05),
-            ("LocalHighlights2012", 0.3),
-            ("LocalSaturation", -0.1),
-            ("LocalTemperature", -0.1),
-        ],
+        defaults: &[("LocalExposure2012", 0.1), ("LocalSaturation", -0.3)],
         learn_from: &["Teeth"],
     },
     Retouch {
         id: "eyes",
         label: "Brighten eyes",
         masks: &[(3, Some(8), "Eye Sclera"), (3, Some(3), "Iris and Pupil")],
-        defaults: &[
-            ("LocalSaturation", 0.073),
-            ("LocalSharpness", 0.144),
-            ("LocalHighlights2012", 0.2),
-            ("LocalShadows2012", 0.2),
-            ("LocalWhites2012", 0.2),
-            ("LocalClarity2012", 0.21),
-        ],
+        defaults: &[("LocalExposure2012", 0.08), ("LocalClarity2012", 0.1), ("LocalSaturation", 0.05), ("LocalSharpness", 0.15)],
         learn_from: &["Eyes", "Iris"],
     },
     Retouch {
         id: "sky",
         label: "Deepen sky",
         masks: &[(2, None, "Sky")],
-        defaults: &[("LocalExposure2012", -0.05), ("LocalHighlights2012", -0.2), ("LocalSaturation", 0.1)],
+        defaults: &[("LocalExposure2012", -0.1), ("LocalHighlights2012", -0.2), ("LocalSaturation", 0.05)],
         learn_from: &["Sky"],
     },
 ];

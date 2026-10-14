@@ -65,6 +65,36 @@ LOOKS = {
         PostCropVignetteAmount=-20, PostCropVignetteMidpoint=50, PostCropVignetteFeather=70,
         curve=[(0, 35), (128, 130), (255, 235)],
     ),
+    # Muted, slightly vintage film: olive/sage greens, matte blacks, creamy
+    # (not pure) whites, natural warm skin. Garden and daylight scenes.
+    "Sage Film": dict(
+        Contrast2012=-12, Highlights2012=-35, Shadows2012=20, Whites2012=-15, Blacks2012=5,
+        Vibrance=-5, Saturation=-8,
+        HueAdjustmentOrange=2, SaturationAdjustmentOrange=-5, LuminanceAdjustmentOrange=8,
+        HueAdjustmentYellow=-15, SaturationAdjustmentYellow=-25, LuminanceAdjustmentYellow=-5,
+        HueAdjustmentGreen=-15, SaturationAdjustmentGreen=-35, LuminanceAdjustmentGreen=-12,
+        SaturationAdjustmentAqua=-30, SaturationAdjustmentBlue=-25, LuminanceAdjustmentBlue=5,
+        SplitToningShadowHue=160, SplitToningShadowSaturation=6,
+        SplitToningHighlightHue=45, SplitToningHighlightSaturation=8, SplitToningBalance=10,
+        GrainAmount=12, GrainSize=25, GrainFrequency=50,
+        curve=[(0, 22), (64, 66), (128, 128), (192, 190), (255, 242)],
+    ),
+    # Warm sunset film: golden highlights, warm brown shadows, khaki/olive
+    # greens, soft contrast that never goes fully black.
+    "Golden Hour Film": dict(
+        Contrast2012=-8, Highlights2012=-30, Shadows2012=15, Whites2012=-10, Blacks2012=8,
+        Vibrance=-10, Saturation=-5,
+        HueAdjustmentRed=5, SaturationAdjustmentRed=-10,
+        HueAdjustmentOrange=3, SaturationAdjustmentOrange=-5, LuminanceAdjustmentOrange=5,
+        HueAdjustmentYellow=-15, SaturationAdjustmentYellow=-25,
+        HueAdjustmentGreen=-25, SaturationAdjustmentGreen=-45, LuminanceAdjustmentGreen=-15,
+        SaturationAdjustmentAqua=-35, SaturationAdjustmentBlue=-35,
+        SplitToningShadowHue=30, SplitToningShadowSaturation=10,
+        SplitToningHighlightHue=42, SplitToningHighlightSaturation=20, SplitToningBalance=20,
+        GrainAmount=18, GrainSize=25, GrainFrequency=50,
+        PostCropVignetteAmount=-10, PostCropVignetteMidpoint=50, PostCropVignetteFeather=70,
+        curve=[(0, 18), (64, 60), (128, 130), (192, 196), (255, 245)],
+    ),
     "Classic B&W": dict(
         ConvertToGrayscale=True, Contrast2012=20, Highlights2012=-15, Shadows2012=10, Clarity2012=10,
         GrayMixerRed=10, GrayMixerOrange=15, GrayMixerYellow=5, GrayMixerGreen=-20, GrayMixerBlue=-15,

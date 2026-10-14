@@ -45,3 +45,6 @@ strip = true
 # Image decoding is painfully slow unoptimized; optimize dependencies even in dev.
 [profile.dev.package."*"]
 opt-level = 3
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"

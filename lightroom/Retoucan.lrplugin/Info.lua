@@ -6,6 +6,9 @@ return {
   LrPluginName = 'Retoucan',
   LrPluginInfoUrl = 'https://github.com/joemalott/retoucan',
   LrInitPlugin = 'Init.lua',
+  -- Start the bridge when Lightroom launches, not on first menu use;
+  -- Retoucan needs the heartbeat to know Lightroom is open.
+  LrForceInitPlugin = true,
   LrShutdownPlugin = 'Shutdown.lua',
   LrLibraryMenuItems = {
     { title = 'Edit Selected Photos with Retoucan', file = 'EditSelected.lua', enabledWhen = 'photosSelected' },

@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use crate::engine::{self, EditOptions};
 
-pub const COMMANDS: &[&str] = &["mcp", "edit-selection", "edit", "train", "install-plugin", "styles", "looks", "status"];
+pub const COMMANDS: &[&str] = &["mcp", "edit-selection", "edit", "train", "install-plugin", "styles", "looks", "status", "doctor", "undo", "cleanup", "check"];
 
 /// Returns `None` when the arguments aren't a CLI command (launch the UI).
 pub fn run(args: &[String]) -> Option<Result<()>> {
@@ -63,6 +63,18 @@ fn dispatch(cmd: &str, rest: &[String]) -> Result<()> {
             for l in engine::list_looks() {
                 println!("{}  [{}] {} ({})", l.uuid, l.group, l.name, l.kind);
             }
+            Ok(())
+        }
+        "undo" | "cleanup" | "check" => {
+            let paths: Vec<PathBuf> = rest.iter().map(PathBuf::from).collect();
+            if paths.is_empty() {
+                bail!("usage: retoucan {cmd} <photo>...");
+            }
+            println!("queued job {}", engine::queue_action(cmd, &paths)?.id);
+            Ok(())
+        }
+        "doctor" => {
+            println!("{}", serde_json::to_string_pretty(&engine::doctor())?);
             Ok(())
         }
         "status" => {

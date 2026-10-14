@@ -1,10 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Preview from './Preview.svelte';
-	import { api, fileName, type Config, type LookSummary, type Prediction } from '$lib/api';
+	import { api, fileName, spread, type Config, type LightroomState, type LookSummary, type Prediction } from '$lib/api';
 	import { previewParams } from '$lib/blend';
 
-	let { config, save }: { config: Config; save: (c: Config) => Promise<void> } = $props();
+	let {
+		config,
+		save,
+		chosen = [],
+		lr
+	}: {
+		config: Config;
+		save: (c: Config) => Promise<void>;
+		/** Photos chosen on the Photos screen, in capture order. */
+		chosen?: string[];
+		lr: LightroomState;
+	} = $props();
 
 	let looks = $state<LookSummary[]>([]);
 	let query = $state('');
@@ -49,10 +60,18 @@
 			picked = looks.find((l) => l.uuid === config.look!.uuid) ?? null;
 			amount = config.look.amount;
 		}
-		try {
-			samples = await api.samplePhotos(config.style, 10);
-		} catch {
-			note = 'Learn a style first to preview looks on your own photos.';
+		// Spread across the whole shoot so the look can be judged as the light
+		// changes through the day. Prefer the Photos screen's choice, then a big
+		// Lightroom selection, then the style's training catalog.
+		const source = chosen.length ? chosen : lr.selected.length > 1 ? lr.selected : [];
+		if (source.length) {
+			samples = spread(source);
+		} else {
+			try {
+				samples = await api.samplePhotos(config.style, 10);
+			} catch {
+				note = 'Learn a style first to preview looks on your own photos.';
+			}
 		}
 		if (samples[0]) show(samples[0]);
 		for (const s of samples) {

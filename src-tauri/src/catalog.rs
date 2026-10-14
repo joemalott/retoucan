@@ -16,22 +16,30 @@ pub struct CatalogPhoto {
     pub pick: f64,
     pub rating: Option<f64>,
     pub capture_time: Option<String>,
+    /// Lightroom color label ("Red", "Green", ...), if any.
+    pub label: Option<String>,
+    /// Folder path relative to its root, e.g. "Main Cam/".
+    pub folder: String,
+    /// Tagged with the "Retoucan" keyword, i.e. already edited by Retoucan.
+    pub retoucan: bool,
     /// Parsed develop settings; `Value::Null` when the photo has none.
     pub settings: Value,
 }
 
-/// Open without taking Lightroom's locks, so it works while Lightroom has the
-/// catalog open. `immutable=1` also skips the WAL, which is fine for reading.
+/// Open read-only. While Lightroom has the catalog open, its newest changes
+/// (flags, edits) sit in the WAL, so read through it; Lightroom doesn't lock
+/// readers out. If that fails, fall back to `immutable=1`, which takes no
+/// locks at all but only sees what Lightroom has checkpointed.
 pub fn open(path: &Path) -> Result<Connection> {
-    let uri = format!(
-        "file:{}?mode=ro&immutable=1",
-        path.to_string_lossy().replace('?', "%3f").replace('#', "%23")
-    );
-    Connection::open_with_flags(
-        uri,
-        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_URI | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-    )
-    .with_context(|| format!("opening catalog {}", path.display()))
+    let escaped = path.to_string_lossy().replace('?', "%3f").replace('#', "%23");
+    let flags = OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_URI | OpenFlags::SQLITE_OPEN_NO_MUTEX;
+    let live = Connection::open_with_flags(format!("file:{escaped}?mode=ro"), flags)
+        .and_then(|c| c.query_row("SELECT count(*) FROM Adobe_images", [], |_| Ok(())).map(|_| c));
+    match live {
+        Ok(c) => Ok(c),
+        Err(_) => Connection::open_with_flags(format!("file:{escaped}?mode=ro&immutable=1"), flags)
+            .with_context(|| format!("opening catalog {}", path.display())),
+    }
 }
 
 pub fn photos(catalog: &Path) -> Result<Vec<CatalogPhoto>> {
@@ -39,7 +47,11 @@ pub fn photos(catalog: &Path) -> Result<Vec<CatalogPhoto>> {
     let catalog_dir = catalog.parent().unwrap_or(Path::new("."));
     let mut stmt = conn.prepare(
         "SELECT i.id_local, r.absolutePath, r.relativePathFromCatalog, fo.pathFromRoot,
-                f.baseName, f.extension, i.pick, i.rating, i.captureTime, d.text
+                f.baseName, f.extension, i.pick, i.rating, i.captureTime, d.text,
+                NULLIF(i.colorLabels, ''),
+                EXISTS (SELECT 1 FROM AgLibraryKeywordImage ki
+                        JOIN AgLibraryKeyword k ON k.id_local = ki.tag
+                        WHERE ki.image = i.id_local AND k.name = 'Retoucan')
          FROM Adobe_images i
          JOIN AgLibraryFile f ON f.id_local = i.rootFile
          JOIN AgLibraryFolder fo ON fo.id_local = f.folder
@@ -59,12 +71,14 @@ pub fn photos(catalog: &Path) -> Result<Vec<CatalogPhoto>> {
             r.get::<_, Option<f64>>(7)?,
             r.get::<_, Option<String>>(8)?,
             r.get::<_, Option<String>>(9)?,
+            r.get::<_, Option<String>>(10)?,
+            r.get::<_, bool>(11)?,
         ))
     })?;
 
     let mut out = Vec::new();
     for row in rows {
-        let (id, abs, rel, folder, base, ext, pick, rating, capture, text) = row?;
+        let (id, abs, rel, folder, base, ext, pick, rating, capture, text, label, retoucan) = row?;
         let folder = folder.unwrap_or_default();
         let file = format!("{base}.{ext}");
         // Prefer the absolute root; fall back to the catalog-relative one,
@@ -93,6 +107,9 @@ pub fn photos(catalog: &Path) -> Result<Vec<CatalogPhoto>> {
             pick: pick.unwrap_or(0.0),
             rating,
             capture_time: capture,
+            label,
+            folder: folder.clone(),
+            retoucan,
             settings,
         });
     }
