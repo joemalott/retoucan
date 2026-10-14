@@ -47,7 +47,15 @@ There's also a global shortcut to edit the photos selected in Lightroom: Control
 2. Open Retoucan and go to **Setup → Lightroom** to install the Lightroom Classic plugin.
 3. Restart Lightroom Classic.
 
-The builds aren't code-signed yet. On macOS, right-click the app and choose **Open** the first time. On Windows, choose **More info → Run anyway**.
+The builds aren't signed with an Apple or Microsoft developer certificate, so both systems warn you the first time.
+
+On macOS, drag Retoucan into Applications and open it. When macOS says it can't verify the developer, click **Done**, then go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. If macOS instead says the app "is damaged and can't be opened" (older releases do this), run this in Terminal and open it again:
+
+```
+xattr -cr /Applications/Retoucan.app
+```
+
+On Windows, choose **More info → Run anyway**.
 
 **Requirements:** Lightroom Classic 13.3 or later (for AI masks), macOS or Windows. The Windows build hasn't been tested with Lightroom yet; reports are welcome.
 
