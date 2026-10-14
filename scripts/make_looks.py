@@ -101,6 +101,66 @@ LOOKS = {
         GrainAmount=20, GrainSize=25, GrainFrequency=50,
         curve=[(0, 5), (64, 56), (192, 200), (255, 255)],
     ),
+    # Old silver print: soft contrast, matte blacks, whites held below paper
+    # white so dresses keep detail, a warm sepia tone, heavy grain.
+    "Vintage B&W": dict(
+        ConvertToGrayscale=True, Contrast2012=-15, Highlights2012=-40, Shadows2012=15, Whites2012=-25, Blacks2012=15,
+        Clarity2012=-5,
+        GrayMixerRed=15, GrayMixerOrange=20, GrayMixerYellow=10, GrayMixerGreen=-10, GrayMixerAqua=-10,
+        GrayMixerBlue=-20,
+        SplitToningShadowHue=32, SplitToningShadowSaturation=25,
+        SplitToningHighlightHue=45, SplitToningHighlightSaturation=18, SplitToningBalance=-10,
+        GrainAmount=40, GrainSize=40, GrainFrequency=60,
+        PostCropVignetteAmount=-25, PostCropVignetteMidpoint=45, PostCropVignetteFeather=70,
+        curve=[(0, 38), (64, 74), (128, 128), (192, 186), (255, 232)],
+    ),
+    # Bright fine-art black and white: airy, low contrast, open shadows,
+    # luminous skin. For getting-ready, portraits and first dances.
+    "Soft B&W": dict(
+        ConvertToGrayscale=True, Exposure2012=0.15, Contrast2012=-20, Highlights2012=-30, Shadows2012=30,
+        Whites2012=5, Blacks2012=10,
+        GrayMixerRed=20, GrayMixerOrange=25, GrayMixerYellow=10, GrayMixerGreen=-5, GrayMixerBlue=-10,
+        GrainAmount=10, GrainSize=20, GrainFrequency=50,
+        curve=[(0, 14), (128, 136), (255, 252)],
+    ),
+    # Dark and earthy: warm shadows, deep olive greens, muted blues,
+    # skin kept warm and bright. The warm counterpart to Moody Matte.
+    "Earthy Moody": dict(
+        Exposure2012=-0.15, Contrast2012=10, Highlights2012=-45, Shadows2012=5, Blacks2012=10,
+        Vibrance=-10,
+        HueAdjustmentOrange=-5, SaturationAdjustmentOrange=-10, LuminanceAdjustmentOrange=5,
+        HueAdjustmentYellow=-25, SaturationAdjustmentYellow=-35, LuminanceAdjustmentYellow=-10,
+        HueAdjustmentGreen=-35, SaturationAdjustmentGreen=-55, LuminanceAdjustmentGreen=-30,
+        SaturationAdjustmentAqua=-50, LuminanceAdjustmentAqua=-15,
+        SaturationAdjustmentBlue=-40, LuminanceAdjustmentBlue=-20,
+        SplitToningShadowHue=30, SplitToningShadowSaturation=12,
+        SplitToningHighlightHue=40, SplitToningHighlightSaturation=10,
+        GrainAmount=12, GrainSize=25, GrainFrequency=50,
+        PostCropVignetteAmount=-20, PostCropVignetteMidpoint=45, PostCropVignetteFeather=70,
+        curve=[(0, 20), (70, 62), (180, 182), (255, 238)],
+    ),
+    # Light and airy: bright and soft, peachy skin, minty pale greens,
+    # clean whites. The classic bright wedding look.
+    "Light & Airy": dict(
+        Exposure2012=0.3, Contrast2012=-15, Highlights2012=-35, Shadows2012=35, Whites2012=10, Blacks2012=10,
+        Vibrance=5, Saturation=-5,
+        HueAdjustmentOrange=-3, SaturationAdjustmentOrange=-10, LuminanceAdjustmentOrange=12,
+        HueAdjustmentYellow=15, SaturationAdjustmentYellow=-40, LuminanceAdjustmentYellow=15,
+        HueAdjustmentGreen=30, SaturationAdjustmentGreen=-45, LuminanceAdjustmentGreen=15,
+        SaturationAdjustmentAqua=-20, LuminanceAdjustmentAqua=10,
+        SaturationAdjustmentBlue=-20, LuminanceAdjustmentBlue=15,
+        SplitToningHighlightHue=30, SplitToningHighlightSaturation=5,
+        curve=[(0, 15), (128, 135), (255, 255)],
+    ),
+    # Slide film: deep blacks, rich reds and blues, punchy but natural skin.
+    "Vivid Slide": dict(
+        Contrast2012=25, Highlights2012=-20, Shadows2012=5, Blacks2012=-10, Vibrance=15,
+        SaturationAdjustmentRed=10, HueAdjustmentOrange=2, SaturationAdjustmentOrange=-5,
+        HueAdjustmentYellow=-10, HueAdjustmentGreen=10, SaturationAdjustmentGreen=-5,
+        HueAdjustmentBlue=-5, SaturationAdjustmentBlue=15, LuminanceAdjustmentBlue=-15,
+        SplitToningHighlightHue=45, SplitToningHighlightSaturation=6,
+        curve=[(0, 0), (64, 54), (192, 205), (255, 252)],
+    ),
 }
 
 

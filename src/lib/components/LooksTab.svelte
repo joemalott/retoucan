@@ -192,7 +192,7 @@
 			<p>
 				Retoucan doesn't take uploads. It scans the presets and profiles Lightroom Classic already has installed{ownCount
 					? ` (${ownCount} found)`
-					: ''}, plus the ten looks built into Retoucan.
+					: ''}, plus the fifteen looks built into Retoucan.
 			</p>
 			<p>
 				To add your own, import them in Lightroom: Develop module, Presets panel, <b>+</b>, Import Presets. Then

@@ -1,0 +1,75 @@
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Retoucan">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/"
+   crs:PresetType="Normal"
+   crs:UUID="5D556A20EE9FE5B27C7E97EA9136484F"
+   crs:SupportsAmount2="True"
+   crs:SupportsAmount="True"
+   crs:SupportsColor="True"
+   crs:SupportsMonochrome="True"
+   crs:SupportsHighDynamicRange="True"
+   crs:SupportsNormalDynamicRange="True"
+   crs:SupportsSceneReferred="True"
+   crs:SupportsOutputReferred="True"
+   crs:RequiresRGBTables="False"
+   crs:CameraModelRestriction=""
+   crs:Copyright="Retoucan (MIT)"
+   crs:ContactInfo="https://github.com/joemalott/retoucan"
+   crs:Version="15.0"
+   crs:ProcessVersion="11.0"
+   crs:Exposure2012="+0.30"
+   crs:Contrast2012="-15"
+   crs:Highlights2012="-35"
+   crs:Shadows2012="+35"
+   crs:Whites2012="+10"
+   crs:Blacks2012="+10"
+   crs:Vibrance="+5"
+   crs:Saturation="-5"
+   crs:HueAdjustmentOrange="-3"
+   crs:SaturationAdjustmentOrange="-10"
+   crs:LuminanceAdjustmentOrange="+12"
+   crs:HueAdjustmentYellow="+15"
+   crs:SaturationAdjustmentYellow="-40"
+   crs:LuminanceAdjustmentYellow="+15"
+   crs:HueAdjustmentGreen="+30"
+   crs:SaturationAdjustmentGreen="-45"
+   crs:LuminanceAdjustmentGreen="+15"
+   crs:SaturationAdjustmentAqua="-20"
+   crs:LuminanceAdjustmentAqua="+10"
+   crs:SaturationAdjustmentBlue="-20"
+   crs:LuminanceAdjustmentBlue="+15"
+   crs:SplitToningHighlightHue="+30"
+   crs:SplitToningHighlightSaturation="+5"
+   crs:ToneCurveName2012="Custom"
+   crs:HasSettings="True">
+   <crs:Name>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Light & Airy</rdf:li>
+    </rdf:Alt>
+   </crs:Name>
+   <crs:ShortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Light & Airy</rdf:li>
+    </rdf:Alt>
+   </crs:ShortName>
+   <crs:SortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Look 13</rdf:li>
+    </rdf:Alt>
+   </crs:SortName>
+   <crs:Group>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Looks</rdf:li>
+    </rdf:Alt>
+   </crs:Group>
+   <crs:ToneCurvePV2012>
+    <rdf:Seq>
+     <rdf:li>0, 15</rdf:li>
+     <rdf:li>128, 135</rdf:li>
+     <rdf:li>255, 255</rdf:li>
+    </rdf:Seq>
+   </crs:ToneCurvePV2012>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>

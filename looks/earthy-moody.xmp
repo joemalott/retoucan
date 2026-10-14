@@ -1,0 +1,82 @@
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Retoucan">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/"
+   crs:PresetType="Normal"
+   crs:UUID="E45162993A35C23F5D76748663D60015"
+   crs:SupportsAmount2="True"
+   crs:SupportsAmount="True"
+   crs:SupportsColor="True"
+   crs:SupportsMonochrome="True"
+   crs:SupportsHighDynamicRange="True"
+   crs:SupportsNormalDynamicRange="True"
+   crs:SupportsSceneReferred="True"
+   crs:SupportsOutputReferred="True"
+   crs:RequiresRGBTables="False"
+   crs:CameraModelRestriction=""
+   crs:Copyright="Retoucan (MIT)"
+   crs:ContactInfo="https://github.com/joemalott/retoucan"
+   crs:Version="15.0"
+   crs:ProcessVersion="11.0"
+   crs:Exposure2012="-0.15"
+   crs:Contrast2012="+10"
+   crs:Highlights2012="-45"
+   crs:Shadows2012="+5"
+   crs:Blacks2012="+10"
+   crs:Vibrance="-10"
+   crs:HueAdjustmentOrange="-5"
+   crs:SaturationAdjustmentOrange="-10"
+   crs:LuminanceAdjustmentOrange="+5"
+   crs:HueAdjustmentYellow="-25"
+   crs:SaturationAdjustmentYellow="-35"
+   crs:LuminanceAdjustmentYellow="-10"
+   crs:HueAdjustmentGreen="-35"
+   crs:SaturationAdjustmentGreen="-55"
+   crs:LuminanceAdjustmentGreen="-30"
+   crs:SaturationAdjustmentAqua="-50"
+   crs:LuminanceAdjustmentAqua="-15"
+   crs:SaturationAdjustmentBlue="-40"
+   crs:LuminanceAdjustmentBlue="-20"
+   crs:SplitToningShadowHue="+30"
+   crs:SplitToningShadowSaturation="+12"
+   crs:SplitToningHighlightHue="+40"
+   crs:SplitToningHighlightSaturation="+10"
+   crs:GrainAmount="+12"
+   crs:GrainSize="+25"
+   crs:GrainFrequency="+50"
+   crs:PostCropVignetteAmount="-20"
+   crs:PostCropVignetteMidpoint="+45"
+   crs:PostCropVignetteFeather="+70"
+   crs:ToneCurveName2012="Custom"
+   crs:HasSettings="True">
+   <crs:Name>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Earthy Moody</rdf:li>
+    </rdf:Alt>
+   </crs:Name>
+   <crs:ShortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Earthy Moody</rdf:li>
+    </rdf:Alt>
+   </crs:ShortName>
+   <crs:SortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Look 12</rdf:li>
+    </rdf:Alt>
+   </crs:SortName>
+   <crs:Group>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Looks</rdf:li>
+    </rdf:Alt>
+   </crs:Group>
+   <crs:ToneCurvePV2012>
+    <rdf:Seq>
+     <rdf:li>0, 20</rdf:li>
+     <rdf:li>70, 62</rdf:li>
+     <rdf:li>180, 182</rdf:li>
+     <rdf:li>255, 238</rdf:li>
+    </rdf:Seq>
+   </crs:ToneCurvePV2012>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>

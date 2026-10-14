@@ -570,6 +570,11 @@ const STARTER_LOOKS: &[(&str, &str)] = &[
     ("sage-film.xmp", include_str!("../../looks/sage-film.xmp")),
     ("golden-hour-film.xmp", include_str!("../../looks/golden-hour-film.xmp")),
     ("classic-bandw.xmp", include_str!("../../looks/classic-bandw.xmp")),
+    ("vintage-bandw.xmp", include_str!("../../looks/vintage-bandw.xmp")),
+    ("soft-bandw.xmp", include_str!("../../looks/soft-bandw.xmp")),
+    ("earthy-moody.xmp", include_str!("../../looks/earthy-moody.xmp")),
+    ("light-and-airy.xmp", include_str!("../../looks/light-and-airy.xmp")),
+    ("vivid-slide.xmp", include_str!("../../looks/vivid-slide.xmp")),
 ];
 
 /// Install (or update) the Lightroom plugin, the retouch presets, and

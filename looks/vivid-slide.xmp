@@ -1,0 +1,69 @@
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Retoucan">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/"
+   crs:PresetType="Normal"
+   crs:UUID="240D769B927EC305B32DED58E9A0E50E"
+   crs:SupportsAmount2="True"
+   crs:SupportsAmount="True"
+   crs:SupportsColor="True"
+   crs:SupportsMonochrome="True"
+   crs:SupportsHighDynamicRange="True"
+   crs:SupportsNormalDynamicRange="True"
+   crs:SupportsSceneReferred="True"
+   crs:SupportsOutputReferred="True"
+   crs:RequiresRGBTables="False"
+   crs:CameraModelRestriction=""
+   crs:Copyright="Retoucan (MIT)"
+   crs:ContactInfo="https://github.com/joemalott/retoucan"
+   crs:Version="15.0"
+   crs:ProcessVersion="11.0"
+   crs:Contrast2012="+25"
+   crs:Highlights2012="-20"
+   crs:Shadows2012="+5"
+   crs:Blacks2012="-10"
+   crs:Vibrance="+15"
+   crs:SaturationAdjustmentRed="+10"
+   crs:HueAdjustmentOrange="+2"
+   crs:SaturationAdjustmentOrange="-5"
+   crs:HueAdjustmentYellow="-10"
+   crs:HueAdjustmentGreen="+10"
+   crs:SaturationAdjustmentGreen="-5"
+   crs:HueAdjustmentBlue="-5"
+   crs:SaturationAdjustmentBlue="+15"
+   crs:LuminanceAdjustmentBlue="-15"
+   crs:SplitToningHighlightHue="+45"
+   crs:SplitToningHighlightSaturation="+6"
+   crs:ToneCurveName2012="Custom"
+   crs:HasSettings="True">
+   <crs:Name>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Vivid Slide</rdf:li>
+    </rdf:Alt>
+   </crs:Name>
+   <crs:ShortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Vivid Slide</rdf:li>
+    </rdf:Alt>
+   </crs:ShortName>
+   <crs:SortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Look 14</rdf:li>
+    </rdf:Alt>
+   </crs:SortName>
+   <crs:Group>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Looks</rdf:li>
+    </rdf:Alt>
+   </crs:Group>
+   <crs:ToneCurvePV2012>
+    <rdf:Seq>
+     <rdf:li>0, 0</rdf:li>
+     <rdf:li>64, 54</rdf:li>
+     <rdf:li>192, 205</rdf:li>
+     <rdf:li>255, 252</rdf:li>
+    </rdf:Seq>
+   </crs:ToneCurvePV2012>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
