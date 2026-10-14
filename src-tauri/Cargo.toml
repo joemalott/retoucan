@@ -1,6 +1,6 @@
 [package]
 name = "retoucan"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local AI first-pass editing for Lightroom Classic"
 authors = ["Joe Malott"]
 edition = "2024"
