@@ -33,21 +33,25 @@
 	let applyStyle = $state(true);
 	let compare = $state(false);
 	let note = $state<string | null>(null);
+	let folder = $state<string | null>(null);
 
-	let groups = $derived.by(() => {
+	let matches = $derived.by(() => {
 		const q = query.trim().toLowerCase();
+		return looks.filter((l) => !q || l.name.toLowerCase().includes(q) || l.group.toLowerCase().includes(q));
+	});
+	let builtin = $derived(matches.filter((l) => l.builtin));
+	// The photographer's own presets, by Lightroom group, alphabetically.
+	let groups = $derived.by(() => {
 		const m = new Map<string, LookSummary[]>();
-		for (const l of looks) {
-			if (q && !l.name.toLowerCase().includes(q) && !l.group.toLowerCase().includes(q)) continue;
+		for (const l of matches) {
+			if (l.builtin) continue;
 			const g = l.group || 'Other';
 			if (!m.has(g)) m.set(g, []);
 			m.get(g)!.push(l);
 		}
-		// Retoucan's own looks first, then the photographer's, alphabetically.
-		return [...m.entries()].sort(([a], [b]) =>
-			a === 'Retoucan Looks' ? -1 : b === 'Retoucan Looks' ? 1 : a.localeCompare(b)
-		);
+		return [...m.entries()].sort(([a], [b]) => a.localeCompare(b));
 	});
+	let ownCount = $derived(looks.filter((l) => !l.builtin).length);
 
 	let dirty = $derived(
 		(picked?.uuid ?? null) !== (config.look?.uuid ?? null) ||
@@ -56,6 +60,7 @@
 
 	onMount(async () => {
 		looks = await api.listLooks();
+		api.presetsFolder().then((f) => (folder = f));
 		if (config.look) {
 			picked = looks.find((l) => l.uuid === config.look!.uuid) ?? null;
 			amount = config.look.amount;
@@ -129,6 +134,11 @@
 	<section class="side">
 		<div class="card controls">
 			<h3>{picked ? picked.name : 'No look'}</h3>
+			{#if picked}
+				<p class="muted small source">
+					{picked.builtin ? 'Built into Retoucan' : `From your Lightroom presets · ${picked.group || 'Other'}`}
+				</p>
+			{/if}
 			{#if picked?.has_table}
 				<p class="muted small">
 					This look includes a color table (LUT). The preview shows its sliders; Lightroom adds the color table.
@@ -149,21 +159,48 @@
 
 		<div class="list">
 			<button class="look" class:on={!picked} onclick={() => pick(null)}>No look</button>
-			{#each groups as [group, items]}
-				<div class="group">{group}</div>
-				{#each items as l}
+			{#if builtin.length}
+				<div class="section">Built into Retoucan</div>
+				{#each builtin as l}
 					<button class="look" class:on={picked?.uuid === l.uuid} onclick={() => pick(l)}>
 						<span>{l.name}</span>
 						{#if l.has_table}<span class="tag">LUT</span>{/if}
 					</button>
 				{/each}
-			{/each}
+			{/if}
+			{#if groups.length}
+				<div class="section">From your Lightroom presets</div>
+				{#each groups as [group, items]}
+					<div class="group">{group}</div>
+					{#each items as l}
+						<button class="look" class:on={picked?.uuid === l.uuid} onclick={() => pick(l)}>
+							<span>{l.name}</span>
+							{#if l.has_table}<span class="tag">LUT</span>{/if}
+						</button>
+					{/each}
+				{/each}
+			{/if}
 			{#if !looks.length}
 				<p class="muted small pad">
 					No presets found. Install the Lightroom plugin (Connect tab) to add Retoucan's starter looks.
 				</p>
 			{/if}
 		</div>
+
+		<details class="about">
+			<summary>Where do these looks come from?</summary>
+			<p>
+				Retoucan doesn't take uploads. It scans the presets and profiles Lightroom Classic already has installed{ownCount
+					? ` (${ownCount} found)`
+					: ''}, plus the ten looks built into Retoucan.
+			</p>
+			<p>
+				To add your own, import them in Lightroom: Develop module, Presets panel, <b>+</b>, Import Presets. Then
+				reopen this tab. A LUT (.cube file) has to be made into a Lightroom profile or preset first; Retoucan can't
+				read a bare .cube file.
+			</p>
+			{#if folder}<p class="path">{folder}</p>{/if}
+		</details>
 	</section>
 </div>
 
@@ -245,6 +282,34 @@
 		flex: 1;
 		min-height: 0;
 		margin: 0 -6px;
+	}
+	.source {
+		margin-top: -6px;
+	}
+	.section {
+		font-size: 12.5px;
+		font-weight: 600;
+		color: var(--beak-2);
+		padding: 16px 10px 2px;
+		border-top: 1px solid var(--line);
+		margin-top: 8px;
+	}
+	.about {
+		font-size: 12.5px;
+		color: var(--muted);
+	}
+	.about summary {
+		cursor: pointer;
+	}
+	.about p {
+		margin: 8px 0 0;
+		line-height: 1.45;
+	}
+	.about .path {
+		font-family: ui-monospace, monospace;
+		font-size: 11px;
+		word-break: break-all;
+		user-select: text;
 	}
 	.group {
 		font-size: 11.5px;

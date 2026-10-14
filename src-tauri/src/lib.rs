@@ -26,6 +26,7 @@ pub fn run() {
             commands::delete_style,
             commands::train_style,
             commands::list_looks,
+            commands::presets_folder,
             commands::look_params,
             commands::lightroom_state,
             commands::install_plugin,

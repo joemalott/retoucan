@@ -209,6 +209,9 @@ pub struct LookSummary {
     pub kind: String,
     pub path: PathBuf,
     pub has_table: bool,
+    /// One of the starter looks Retoucan installs, rather than a preset
+    /// found in the photographer's own Lightroom presets.
+    pub builtin: bool,
 }
 
 pub fn list_looks() -> Vec<LookSummary> {
@@ -216,6 +219,7 @@ pub fn list_looks() -> Vec<LookSummary> {
         .into_iter()
         .filter(|p| p.group != "Retoucan")
         .map(|p| LookSummary {
+            builtin: p.path.parent().and_then(|d| d.file_name()).is_some_and(|n| n == "Retoucan Looks"),
             uuid: p.uuid,
             name: p.name.trim().to_string(),
             group: p.group.trim().to_string(),
@@ -224,6 +228,11 @@ pub fn list_looks() -> Vec<LookSummary> {
             has_table: p.has_table,
         })
         .collect()
+}
+
+/// The folder Retoucan scans for looks: Lightroom's own presets folder.
+pub fn presets_folder() -> Option<PathBuf> {
+    presets::settings_dir()
 }
 
 pub fn look_params(path: &Path) -> Result<Map<String, Value>> {

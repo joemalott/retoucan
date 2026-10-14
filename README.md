@@ -25,7 +25,7 @@
 You import and cull in Lightroom Classic as usual. Retoucan reads your flags, stars and color labels, edits the photos you picked, and writes the results back into Lightroom as normal develop settings. Every slider and mask stays editable, and one click undoes the lot.
 
 - **Learns your style.** Point it at a catalog you've already edited. It trains in about a minute and predicts exposure, white balance (temperature and tint) and tone for each new photo.
-- **Applies a look.** Use any Lightroom preset (`.xmp`) or 3D LUT (`.cube`) you already own, or one of the ten film looks that ship with Retoucan. Preview it on sample photos and set the strength before anything touches your catalog.
+- **Applies a look.** Retoucan scans the presets and profiles already installed in Lightroom Classic, including LUT-based ones, and adds ten film looks of its own. There's no upload: to use a new preset, import it into Lightroom first. A bare `.cube` LUT has to be made into a Lightroom profile or preset before Retoucan can see it. Preview the look on sample photos and set the strength before anything touches your catalog.
 - **AI masks and retouching.** Adds Lightroom's own AI masks for subject, background, skin, teeth, eyes and sky with gentle adjustments, and removes masks that found nothing (no faces, no sky).
 - **Test batch first.** Tries the edit on a spread of samples from the shoot. If you like them, it edits the rest; if not, it undoes them.
 - **Batch editing for big shoots.** Handles hundreds of RAW photos in one go, with progress and time remaining. Edited photos get a `Retoucan` keyword, and any that need a second look go in a collection.

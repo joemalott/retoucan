@@ -59,6 +59,11 @@ pub fn list_looks() -> Vec<LookSummary> {
 }
 
 #[tauri::command]
+pub fn presets_folder() -> Option<String> {
+    engine::presets_folder().map(|p| p.to_string_lossy().into())
+}
+
+#[tauri::command]
 pub fn look_params(path: String) -> Res<Map<String, Value>> {
     engine::look_params(std::path::Path::new(&path)).map_err(err)
 }

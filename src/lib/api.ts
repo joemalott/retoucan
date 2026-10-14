@@ -18,6 +18,8 @@ export type LookSummary = {
 	kind: string;
 	path: string;
 	has_table: boolean;
+	/** A starter look Retoucan installed, not one found in Lightroom. */
+	builtin: boolean;
 };
 export type LightroomState = {
 	connected: boolean;
@@ -66,6 +68,7 @@ export const api = {
 	deleteStyle: (id: string) => invoke<void>('delete_style', { id }),
 	trainStyle: (catalog: string, name: string) => invoke<StyleSummary>('train_style', { catalog, name }),
 	listLooks: () => invoke<LookSummary[]>('list_looks'),
+	presetsFolder: () => invoke<string | null>('presets_folder'),
 	lookParams: (path: string) => invoke<Record<string, unknown>>('look_params', { path }),
 	lightroomState: () => invoke<LightroomState>('lightroom_state'),
 	installPlugin: () => invoke<string>('install_plugin'),
