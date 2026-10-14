@@ -1,9 +1,10 @@
 [package]
 name = "retoucan"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Local AI first-pass editing for Lightroom Classic"
+authors = ["Joe Malott"]
 edition = "2024"
+default-run = "retoucan"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -27,6 +28,10 @@ rusqlite = { version = "0.40.2", features = ["bundled"] }
 image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
 anyhow = "1.0.104"
 rayon = "1.12.0"
+dirs = "7.0.0"
+walkdir = "2.5.0"
+base64 = "0.23.1"
+tauri-plugin-dialog = "2.8.2"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
@@ -36,3 +41,7 @@ lto = true
 opt-level = 3
 panic = "abort"
 strip = true
+
+# Image decoding is painfully slow unoptimized; optimize dependencies even in dev.
+[profile.dev.package."*"]
+opt-level = 3

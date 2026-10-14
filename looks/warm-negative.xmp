@@ -1,0 +1,75 @@
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Retoucan">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/"
+   crs:PresetType="Normal"
+   crs:UUID="A170E2E5F2BA1D38069308F10F73E19B"
+   crs:SupportsAmount2="True"
+   crs:SupportsAmount="True"
+   crs:SupportsColor="True"
+   crs:SupportsMonochrome="True"
+   crs:SupportsHighDynamicRange="True"
+   crs:SupportsNormalDynamicRange="True"
+   crs:SupportsSceneReferred="True"
+   crs:SupportsOutputReferred="True"
+   crs:RequiresRGBTables="False"
+   crs:CameraModelRestriction=""
+   crs:Copyright="Retoucan (MIT)"
+   crs:ContactInfo="https://github.com/joemalott/retoucan"
+   crs:Version="15.0"
+   crs:ProcessVersion="11.0"
+   crs:Contrast2012="-15"
+   crs:Highlights2012="-20"
+   crs:Shadows2012="+25"
+   crs:HueAdjustmentRed="+10"
+   crs:HueAdjustmentOrange="+5"
+   crs:LuminanceAdjustmentOrange="+10"
+   crs:SaturationAdjustmentOrange="-5"
+   crs:HueAdjustmentYellow="-15"
+   crs:SaturationAdjustmentYellow="-20"
+   crs:HueAdjustmentGreen="+25"
+   crs:SaturationAdjustmentGreen="-40"
+   crs:HueAdjustmentAqua="-10"
+   crs:HueAdjustmentBlue="-10"
+   crs:SaturationAdjustmentBlue="-15"
+   crs:SplitToningHighlightHue="+45"
+   crs:SplitToningHighlightSaturation="+12"
+   crs:SplitToningShadowHue="+190"
+   crs:SplitToningShadowSaturation="+6"
+   crs:GrainAmount="+18"
+   crs:GrainSize="+25"
+   crs:GrainFrequency="+50"
+   crs:ToneCurveName2012="Custom"
+   crs:HasSettings="True">
+   <crs:Name>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Warm Negative</rdf:li>
+    </rdf:Alt>
+   </crs:Name>
+   <crs:ShortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Warm Negative</rdf:li>
+    </rdf:Alt>
+   </crs:ShortName>
+   <crs:SortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Look 02</rdf:li>
+    </rdf:Alt>
+   </crs:SortName>
+   <crs:Group>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Looks</rdf:li>
+    </rdf:Alt>
+   </crs:Group>
+   <crs:ToneCurvePV2012>
+    <rdf:Seq>
+     <rdf:li>0, 12</rdf:li>
+     <rdf:li>60, 58</rdf:li>
+     <rdf:li>128, 132</rdf:li>
+     <rdf:li>200, 205</rdf:li>
+     <rdf:li>255, 250</rdf:li>
+    </rdf:Seq>
+   </crs:ToneCurvePV2012>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>

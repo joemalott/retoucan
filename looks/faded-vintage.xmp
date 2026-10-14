@@ -1,0 +1,64 @@
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Retoucan">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/"
+   crs:PresetType="Normal"
+   crs:UUID="A1F217CDBDEFE01B340A959C77216076"
+   crs:SupportsAmount2="True"
+   crs:SupportsAmount="True"
+   crs:SupportsColor="True"
+   crs:SupportsMonochrome="True"
+   crs:SupportsHighDynamicRange="True"
+   crs:SupportsNormalDynamicRange="True"
+   crs:SupportsSceneReferred="True"
+   crs:SupportsOutputReferred="True"
+   crs:RequiresRGBTables="False"
+   crs:CameraModelRestriction=""
+   crs:Copyright="Retoucan (MIT)"
+   crs:ContactInfo="https://github.com/joemalott/retoucan"
+   crs:Version="15.0"
+   crs:ProcessVersion="11.0"
+   crs:Contrast2012="-10"
+   crs:Saturation="-35"
+   crs:SplitToningShadowHue="+38"
+   crs:SplitToningShadowSaturation="+18"
+   crs:SplitToningHighlightHue="+38"
+   crs:SplitToningHighlightSaturation="+18"
+   crs:GrainAmount="+25"
+   crs:GrainSize="+30"
+   crs:GrainFrequency="+50"
+   crs:PostCropVignetteAmount="-20"
+   crs:PostCropVignetteMidpoint="+50"
+   crs:PostCropVignetteFeather="+70"
+   crs:ToneCurveName2012="Custom"
+   crs:HasSettings="True">
+   <crs:Name>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Faded Vintage</rdf:li>
+    </rdf:Alt>
+   </crs:Name>
+   <crs:ShortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Faded Vintage</rdf:li>
+    </rdf:Alt>
+   </crs:ShortName>
+   <crs:SortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Look 06</rdf:li>
+    </rdf:Alt>
+   </crs:SortName>
+   <crs:Group>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Looks</rdf:li>
+    </rdf:Alt>
+   </crs:Group>
+   <crs:ToneCurvePV2012>
+    <rdf:Seq>
+     <rdf:li>0, 35</rdf:li>
+     <rdf:li>128, 130</rdf:li>
+     <rdf:li>255, 235</rdf:li>
+    </rdf:Seq>
+   </crs:ToneCurvePV2012>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>

@@ -1,156 +1,154 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+	import { onMount } from 'svelte';
+	import Logo from '$lib/components/Logo.svelte';
+	import EditTab from '$lib/components/EditTab.svelte';
+	import LooksTab from '$lib/components/LooksTab.svelte';
+	import RetouchTab from '$lib/components/RetouchTab.svelte';
+	import StylesTab from '$lib/components/StylesTab.svelte';
+	import ConnectTab from '$lib/components/ConnectTab.svelte';
+	import { api, type Config, type LightroomState, type StyleSummary } from '$lib/api';
 
-  let name = $state("");
-  let greetMsg = $state("");
+	type Tab = 'edit' | 'looks' | 'retouch' | 'styles' | 'connect';
+	const tabs: { id: Tab; label: string; hint: string }[] = [
+		{ id: 'edit', label: 'Edit', hint: 'Send photos to Lightroom' },
+		{ id: 'looks', label: 'Looks', hint: 'Presets & preview' },
+		{ id: 'retouch', label: 'Retouch', hint: 'Skin, teeth, eyes…' },
+		{ id: 'styles', label: 'Styles', hint: 'Learn how you edit' },
+		{ id: 'connect', label: 'Connect', hint: 'Lightroom & AI tools' }
+	];
 
-  async function greet(event: Event) {
-    event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsg = await invoke("greet", { name });
-  }
+	let tab = $state<Tab>('edit');
+	let config = $state<Config>({ style: null, look: null, retouch: [] });
+	let styles = $state<StyleSummary[]>([]);
+	let lr = $state<LightroomState>({
+		connected: false,
+		catalog: null,
+		selected: [],
+		seconds_ago: null,
+		plugin_installed: false
+	});
+
+	async function refresh() {
+		[config, styles] = await Promise.all([api.getConfig(), api.listStyles()]);
+	}
+
+	async function save(next: Config) {
+		config = next;
+		await api.saveConfig(next);
+	}
+
+	onMount(() => {
+		refresh();
+		const poll = async () => (lr = await api.lightroomState());
+		poll();
+		const t = setInterval(poll, 2000);
+		return () => clearInterval(t);
+	});
 </script>
 
-<main class="container">
-  <h1>Welcome to Tauri + Svelte</h1>
+<div class="app">
+	<aside>
+		<div class="brand">
+			<Logo size={36} />
+			<div>
+				<h1>Retoucan</h1>
+				<p class="muted small">Your style, first pass</p>
+			</div>
+		</div>
+		<nav>
+			{#each tabs as t}
+				<button class:active={tab === t.id} onclick={() => (tab = t.id)}>
+					<span>{t.label}</span>
+					<small>{t.hint}</small>
+				</button>
+			{/each}
+		</nav>
+		<div class="lr">
+			<span class="dot" class:on={lr.connected} class:warn={!lr.connected && lr.plugin_installed}></span>
+			<div>
+				<div class="small">
+					{lr.connected ? 'Lightroom connected' : lr.plugin_installed ? 'Lightroom closed' : 'Plugin not installed'}
+				</div>
+				{#if lr.connected}
+					<div class="muted small">{lr.selected.length} selected</div>
+				{/if}
+			</div>
+		</div>
+	</aside>
 
-  <div class="row">
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
-    </a>
-  </div>
-  <p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p>
-
-  <form class="row" onsubmit={greet}>
-    <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{greetMsg}</p>
-</main>
+	<main>
+		{#if tab === 'edit'}
+			<EditTab {config} {styles} {lr} go={(t: Tab) => (tab = t)} />
+		{:else if tab === 'looks'}
+			<LooksTab {config} {save} />
+		{:else if tab === 'retouch'}
+			<RetouchTab {config} {styles} {save} />
+		{:else if tab === 'styles'}
+			<StylesTab {config} {styles} {save} {refresh} />
+		{:else}
+			<ConnectTab {lr} />
+		{/if}
+	</main>
+</div>
 
 <style>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.svelte-kit:hover {
-  filter: drop-shadow(0 0 2em #ff3e00);
-}
-
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
-
+	.app {
+		display: grid;
+		grid-template-columns: 232px 1fr;
+		height: 100vh;
+	}
+	aside {
+		background: var(--panel);
+		border-right: 1px solid var(--line);
+		display: flex;
+		flex-direction: column;
+		padding: 20px 14px;
+		gap: 24px;
+	}
+	.brand {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		padding: 0 6px;
+	}
+	.brand h1 {
+		font-size: 19px;
+	}
+	nav {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	nav button {
+		text-align: left;
+		padding: 10px 12px;
+		border-radius: 10px;
+		display: flex;
+		flex-direction: column;
+		transition: background 0.12s;
+	}
+	nav button:hover {
+		background: var(--card);
+	}
+	nav button.active {
+		background: var(--card);
+		box-shadow: inset 3px 0 0 var(--beak);
+	}
+	nav small {
+		color: var(--muted);
+		font-size: 12px;
+	}
+	.lr {
+		margin-top: auto;
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		padding: 12px;
+		border-radius: 10px;
+		background: var(--card);
+	}
+	main {
+		overflow: auto;
+		min-width: 0;
+	}
 </style>

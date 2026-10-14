@@ -1,0 +1,1 @@
+require('Bridge').stop = true

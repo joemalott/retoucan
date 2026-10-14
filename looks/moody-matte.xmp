@@ -1,0 +1,70 @@
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Retoucan">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/"
+   crs:PresetType="Normal"
+   crs:UUID="3608B951ED34DF1A4A3549FB2AC24238"
+   crs:SupportsAmount2="True"
+   crs:SupportsAmount="True"
+   crs:SupportsColor="True"
+   crs:SupportsMonochrome="True"
+   crs:SupportsHighDynamicRange="True"
+   crs:SupportsNormalDynamicRange="True"
+   crs:SupportsSceneReferred="True"
+   crs:SupportsOutputReferred="True"
+   crs:RequiresRGBTables="False"
+   crs:CameraModelRestriction=""
+   crs:Copyright="Retoucan (MIT)"
+   crs:ContactInfo="https://github.com/joemalott/retoucan"
+   crs:Version="15.0"
+   crs:ProcessVersion="11.0"
+   crs:Exposure2012="-0.20"
+   crs:Contrast2012="+10"
+   crs:Highlights2012="-40"
+   crs:Shadows2012="+10"
+   crs:Blacks2012="+15"
+   crs:Clarity2012="+5"
+   crs:Vibrance="-15"
+   crs:SaturationAdjustmentGreen="-50"
+   crs:LuminanceAdjustmentGreen="-20"
+   crs:SaturationAdjustmentBlue="-30"
+   crs:SplitToningShadowHue="+200"
+   crs:SplitToningShadowSaturation="+12"
+   crs:SplitToningHighlightHue="+35"
+   crs:SplitToningHighlightSaturation="+10"
+   crs:PostCropVignetteAmount="-15"
+   crs:PostCropVignetteMidpoint="+50"
+   crs:PostCropVignetteFeather="+60"
+   crs:ToneCurveName2012="Custom"
+   crs:HasSettings="True">
+   <crs:Name>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Moody Matte</rdf:li>
+    </rdf:Alt>
+   </crs:Name>
+   <crs:ShortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Moody Matte</rdf:li>
+    </rdf:Alt>
+   </crs:ShortName>
+   <crs:SortName>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Look 04</rdf:li>
+    </rdf:Alt>
+   </crs:SortName>
+   <crs:Group>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">Retoucan Looks</rdf:li>
+    </rdf:Alt>
+   </crs:Group>
+   <crs:ToneCurvePV2012>
+    <rdf:Seq>
+     <rdf:li>0, 25</rdf:li>
+     <rdf:li>70, 65</rdf:li>
+     <rdf:li>180, 185</rdf:li>
+     <rdf:li>255, 240</rdf:li>
+    </rdf:Seq>
+   </crs:ToneCurvePV2012>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>

@@ -96,6 +96,17 @@ pub struct StyleModel {
     pub feat_std: Vec<f32>,
     pub feats: Vec<Vec<f32>>,
     pub sliders: Vec<SliderModel>,
+    /// Learned local adjustments per retouch id (see presets::RETOUCH).
+    #[serde(default)]
+    pub retouch: std::collections::BTreeMap<String, std::collections::BTreeMap<String, f64>>,
+    /// Linear fit of the white balance targets (mireds, tint) on the camera's
+    /// as-shot multipliers. Lets the preview show WB relative to "as shot".
+    #[serde(default)]
+    pub wb_fit: Vec<f32>,
+    #[serde(default)]
+    pub source_catalog: String,
+    #[serde(default)]
+    pub created: String,
 }
 
 const K: usize = 7;
@@ -217,6 +228,10 @@ pub fn train(name: &str, samples: &[Sample]) -> StyleModel {
         feat_std: std,
         feats,
         sliders,
+        retouch: crate::presets::learn_retouch(&samples.iter().map(|s| &s.settings).collect::<Vec<_>>()),
+        wb_fit: fit_wb(samples),
+        source_catalog: String::new(),
+        created: String::new(),
     }
 }
 
@@ -305,6 +320,7 @@ impl StyleModel {
             let v = if sl.key == "Temperature" { 1e6 / v.max(20.0) } else { v };
             let v = v.clamp(sl.min, sl.max);
             // Lightroom's own precision: exposure to 0.01, the rest whole numbers.
+            let v = v as f64;
             let v = if sl.key == "Exposure2012" { (v * 100.0).round() / 100.0 } else { v.round() };
             out.insert(sl.key.into(), serde_json::json!(v));
         }
@@ -312,5 +328,70 @@ impl StyleModel {
             out.insert("WhiteBalance".into(), "Custom".into());
         }
         out
+    }
+}
+
+const WB_RG: usize = features::LEN - 2;
+const WB_BG: usize = features::LEN - 1;
+
+/// Least squares `target = a + b*wb_rg + c*wb_bg` for mireds then tint.
+fn fit_wb(samples: &[Sample]) -> Vec<f32> {
+    let mut out = Vec::new();
+    for key in ["Temperature", "Tint"] {
+        let sl = SLIDERS.iter().find(|s| s.key == key).unwrap();
+        let mut a = [[0f64; 4]; 3];
+        let mut n = 0;
+        for s in samples {
+            let Some(t) = target(&s.settings, sl) else { continue };
+            let x = [1.0, s.features[WB_RG] as f64, s.features[WB_BG] as f64];
+            for i in 0..3 {
+                for j in 0..3 {
+                    a[i][j] += x[i] * x[j];
+                }
+                a[i][3] += x[i] * t as f64;
+            }
+            n += 1;
+        }
+        if n < 12 {
+            return vec![];
+        }
+        for i in 0..3 {
+            a[i][i] += 1e-6;
+        }
+        for c in 0..3 {
+            let p = (c..3).max_by(|&i, &j| a[i][c].abs().partial_cmp(&a[j][c].abs()).unwrap()).unwrap();
+            a.swap(c, p);
+            let piv = a[c][c];
+            for j in c..4 {
+                a[c][j] /= piv;
+            }
+            for i in 0..3 {
+                if i != c {
+                    let f = a[i][c];
+                    for j in c..4 {
+                        a[i][j] -= f * a[c][j];
+                    }
+                }
+            }
+        }
+        out.extend((0..3).map(|i| a[i][3] as f32));
+    }
+    out
+}
+
+impl StyleModel {
+    /// White balance as a shift from the camera's as-shot rendering, for the
+    /// preview: (mired shift, positive = warmer; tint shift).
+    pub fn wb_shift(&self, raw_features: &[f32; features::LEN], predicted: &serde_json::Map<String, Value>) -> (f32, f32) {
+        if self.wb_fit.len() != 6 {
+            return (0.0, 0.0);
+        }
+        let (rg, bg) = (raw_features[WB_RG], raw_features[WB_BG]);
+        let typical_mired = self.wb_fit[0] + self.wb_fit[1] * rg + self.wb_fit[2] * bg;
+        let typical_tint = self.wb_fit[3] + self.wb_fit[4] * rg + self.wb_fit[5] * bg;
+        let mired = predicted.get("Temperature").and_then(Value::as_f64).map(|k| 1e6 / k as f32);
+        let tint = predicted.get("Tint").and_then(Value::as_f64).map(|t| t as f32);
+        // Lower mireds = higher Kelvin setting = warmer rendering.
+        (mired.map(|m| typical_mired - m).unwrap_or(0.0), tint.map(|t| t - typical_tint).unwrap_or(0.0))
     }
 }
