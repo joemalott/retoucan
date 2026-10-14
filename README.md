@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/joemalott/retoucan/releases/latest"><strong>Download for macOS or Windows</strong></a>
+  <a href="https://github.com/joemalott/retoucan/releases/latest"><strong>Download for macOS or Windows</strong></a> · <a href="https://retoucan.com">retoucan.com</a>
 </p>
 
 ## What it does
