@@ -441,17 +441,25 @@ function Bridge.watch()
     local tokenPath = LrPathUtils.child(cfg.bridge, 'watcher.token')
     local token = tostring(os.time()) .. '-' .. tostring(math.random(1, 1e9))
     writeFile(tokenPath, token)
-    local tick, lastError = 0, nil
+    local lastError = nil
     local function check(ok, e)
       if not ok and tostring(e) ~= lastError then
         lastError = tostring(e)
         log:error(lastError)
       end
     end
-    while LrFileUtils.readFile(tokenPath) == token do
+    local function current() return LrFileUtils.readFile(tokenPath) == token end
+    -- The heartbeat gets its own task: a long job (mask detection on hundreds
+    -- of photos) blocks the job loop, and Retoucan must still see Lightroom
+    -- as open while it runs.
+    LrTasks.startAsyncTask(function()
+      while current() do
+        check(LrTasks.pcall(Bridge.writeState, cfg))
+        LrTasks.sleep(2)
+      end
+    end)
+    while current() do
       check(LrTasks.pcall(Bridge.processJobs, cfg))
-      if tick % 2 == 0 then check(LrTasks.pcall(Bridge.writeState, cfg)) end
-      tick = tick + 1
       LrTasks.sleep(1)
     end
     log:info('watcher stopped (a newer one took over)')
